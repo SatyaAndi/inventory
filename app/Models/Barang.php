@@ -9,14 +9,14 @@ class Barang extends Model
 {
     use HasFactory;
 
-   protected $table = 'barangs';
+    protected $table = 'barang';
     protected $primaryKey = 'kode_barang';
-    // public $incrementing = false;
-    // protected $keyType = 'int';
 
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-
+        'kode_barang',
         'nama_barang',
         'unit',
         'ukuran',
@@ -24,6 +24,7 @@ class Barang extends Model
         'jenis',
         'harga_satuan',
         'stok'
-
     ];
+
+    public $timestamps = false;
 }

@@ -6,85 +6,24 @@ use App\Models\Barang;
 use Illuminate\Http\Request;
 
 class BarangController extends Controller
+
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         $barangs = Barang::all();
         return view('barang.index', compact('barangs'));
-
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('barang.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-         $request->validate([
-            'nama_barang' => 'required|string|max:150',
-            'unit' => 'required|string',
-            'ukuran' => 'required|string|max:150',
-            'warna' => 'required|string|max:50',
-            'jenis' => 'required|string|max:50',
-            'harga_satuan' => 'required|integer',
-            'stok' => 'required|integer',
-        ]);
-    
-        Barang::create($request-> all());
-    
-        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan.');
-    
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Barang $barang)
-    {
-        return view('barang.show', compact('barang'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Barang $barang)
-    {
-        return view('barang.edit', compact('barang'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Barang $barang)
-    {
-        $request->validate([
+        $validatedData = $request->validate([
+            'kode_barang' => 'required|unique:barang',
             'nama_barang' => 'required',
             'unit' => 'required',
             'ukuran' => 'required',
@@ -94,21 +33,56 @@ class BarangController extends Controller
             'stok' => 'required|integer',
         ]);
 
-        $barang->update($request->all());
-        return redirect()->route('barang.index');
+        Barang::create($validatedData);
 
+        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    public function show(Barang $barang)
+    {
+        return view('barang.show', compact('barang'));
+    }
+
+    public function edit($kode_barang)
+    {
+        $barang = Barang::where('kode_barang', $kode_barang)->firstOrFail();
+        return view('barang.edit', compact('barang'));
+    }
+
+    public function update(Request $request, $kode_barang)
+    {
+        $validatedData = $request->validate([
+            'kode_barang' => 'required|unique:barang,kode_barang,' . $kode_barang . ',kode_barang',
+            'nama_barang' => 'required',
+            'unit' => 'required',
+            'ukuran' => 'required',
+            'warna' => 'required',
+            'jenis' => 'required',
+            'harga_satuan' => 'required|integer',
+            'stok' => 'required|integer',
+        ]);
+
+        $barang = Barang::where('kode_barang', $kode_barang)->firstOrFail();
+
+        // Update hanya field yang diperlukan
+        $barang->update([
+            'kode_barang' => $validatedData['kode_barang'],
+            'nama_barang' => $validatedData['nama_barang'],
+            'unit' => $validatedData['unit'],
+            'ukuran' => $validatedData['ukuran'],
+            'warna' => $validatedData['warna'],
+            'jenis' => $validatedData['jenis'],
+            'harga_satuan' => $validatedData['harga_satuan'],
+            'stok' => $validatedData['stok'],
+        ]);
+
+        return redirect()->route('barang.index')->with('success', 'Barang berhasil diupdate');
+    }
+
+
     public function destroy(Barang $barang)
     {
         $barang->delete();
-        return redirect()->route('barang.index');
-
+        return redirect()->route('barang.index')->with('success', 'Barang berhasil dihapus');
     }
 }
